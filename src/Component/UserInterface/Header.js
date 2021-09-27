@@ -241,11 +241,11 @@ export default function Header(props) {
 
   return (
     <div className={classes.grow}>
-      <AppBar position="static" color="#fff">
+      <AppBar position="static" color="transparent">
         <Toolbar>
          
-        <div style={{ padding: 5 }}>
-            <img src="/glasskart.png" width="150"/>
+        <div style={{ padding: 5 }} >
+            <img src="/glasskart.png" width="150" />
           </div>
 
             {mainMenu()}

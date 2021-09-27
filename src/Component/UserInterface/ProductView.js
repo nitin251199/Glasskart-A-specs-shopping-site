@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,createRef } from "react";
 import Header from "./Header";
 import { makeStyles } from "@material-ui/core/styles";
 import { Grid,Button,Divider } from '@material-ui/core'
@@ -8,16 +8,45 @@ import Typography from '@material-ui/core/Typography';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Link from '@material-ui/core/Link';
 import Radio from '@material-ui/core/Radio';
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css"; 
+import "slick-carousel/slick/slick-theme.css";
+import ArrowForwardIos from '@material-ui/icons/ArrowForwardIos';
+import ArrowBackIos from '@material-ui/icons/ArrowBackIos';
 import Footer from "./Footer";
 
 const useStyles = makeStyles((theme) => ({}));
 
 export default function ProductView(props) {
+
+    var picSlider=createRef()
+    var picBigSlider=createRef()
+
+    var settings = {
+        dots: false,
+        arrows:false,
+        infinite: true,
+        speed: 500,
+        slidesToShow: 5,
+       focusOnSelect:true
+      };
+    
+      var bigSettings = {
+        dots: false,
+        arrows: false,
+        infinite: true,
+        speed: 500,
+        slidesToShow: 2,
+        slidesToScroll: 1,
+      };
+
     var product = props.location.state.itemProps
     const [selected,setSelected] = useState(props.location.state.selected)
     var item = props.location.state.item
    // const [active,setActive] = useState(false)
-   const [productPicture,setProductPicture] = useState([])
+   const [picSelected, setPicSelected] = useState("");
+  const [productPicture, setProductPicture] = useState([]);
+
 
    const fetchAllProductPictures = async() => {
     var body = { "finalproductid":selected.finalproductid }
@@ -27,7 +56,7 @@ export default function ProductView(props) {
 
    useEffect(function(){
        fetchAllProductPictures()
-   },[])
+   },[selected])
 
 
     const classes = useStyles();
@@ -35,15 +64,13 @@ export default function ProductView(props) {
     const breadcrumbs = () => {
         return(
             <Breadcrumbs aria-label="breadcrumb">
-      <Link color="inherit" href="/" 
-      //onClick={handleClick}
+      <Link color="inherit" href="/home" 
       style={{fontSize:12,letterSpacing:1}}
       >
         HOME
       </Link>
       <Link color="inherit" 
-      //href="/getting-started/installation/" 
-      //onClick={handleClick}
+      href="/home"
       style={{fontSize:12,letterSpacing:1}}
       >
         GLASSKART
@@ -59,9 +86,64 @@ const handleChange = async(item) => {
     setSelected({finalproductid,colorid,colorname,offerprice,price,productpicture})
   }
 
-// const handleRadioClick = () => {
-//     active ? setActive(false) : setActive(true)
-// }
+  const clickThumbNails = (item,index) => {
+    setPicSelected(item.pictureid);
+    picSlider.current.slickNext()
+    picBigSlider.current.slickGoTo(index)
+  };
+
+  const showProductPicture = () => {
+      return  productPicture.map((picture,index)=>{
+            return (
+                <div style={{
+                    display:'flex',
+                    justifyContent:'center',
+                    alignItems:'center',
+                  }}>
+      <div 
+       onClick={() => clickThumbNails(picture,index)}
+          style={{
+            display:'flex',
+            justifyContent:'center',
+            alignItems:'center',
+              border:picture.pictureid == picSelected
+              ? "1px solid #000"
+              : "1px solid #e2e2e2",
+              borderRadius:5,
+           cursor:'pointer',
+            height:90,
+              margin:2}}>
+          <img src={`${ServerURL}/images/${picture.image}`} width='65px'/>
+      </div>
+      </div>
+            )}
+      )
+  }
+
+  const showBigProductPicture = () => {
+      return productPicture.map((picture) => {
+          return(
+              <div style={{
+                display:'flex',
+                justifyContent:'center',
+                alignItems:'center',
+              }}>
+                  <div style={{
+                display:'flex',
+                justifyContent:'center',
+                alignItems:'center',
+              }}>
+
+                      <img src={`${ServerURL}/images/${picture.image}`}
+                            width="100%" height="100%" />
+
+              </div>
+              </div>
+          )
+      })
+  }
+
+
 
 const displayProduct = (props) => {
     return(
@@ -69,12 +151,30 @@ const displayProduct = (props) => {
         <Grid container spacing={3}>
             <Grid item xs={8}>
             <p style={{textAlign:'center'}}>Product View</p>
-                <div style={{paddingTop:50,paddingBottom:50}}>
-                <img src={`${ServerURL}/images/${selected.productpicture}`} width="50%"/>
-                <img src="./pic2.jpg" width="50%"/>
-                </div>
+            <div style={{
+                   display:'flex',
+                   justifyContent:'center',
+                   alignItems:'center',
+              }}>
+              <ArrowBackIos  color="action" style={{cursor:'pointer',}} onClick={()=>{
+                  picSlider.current.slickPrev()
+                  picBigSlider.current.slickPrev()
+                }}/>
+                <div style={{
+                    width:"100%"
+                }}>
+                <Slider {...bigSettings} ref={picBigSlider} >
+              {showBigProductPicture()}
+              </Slider>
+              </div>
+              <ArrowForwardIos  color="action" style={{cursor:'pointer',}} onClick={()=>{
+                picSlider.current.slickNext()
+                picBigSlider.current.slickNext()
+              }}/>
+              </div>
+                
                 <Grid item xs={12}>
-                <div style={{display: 'flex',justifyContent: 'space-between',padding: 15,alignItems: 'center'}}>
+                <div style={{display: 'flex',justifyContent: 'space-between',padding: 0,alignItems: 'center'}}>
                     <ul style={{listStyle: 'none',border: '1px solid #000',display: 'flex',padding: 3,borderRadius: 40,pointerEvents: 'none',left: 10}}>
                         <li style={{paddingLeft:4}}>4.6</li>
                         <li style={{paddingInline:4}}>
@@ -209,18 +309,14 @@ const displayProduct = (props) => {
                         </div>
                     </div>
                 </div>
-                <div style={{paddingTop: 30,paddingBottom:50,display:'flex',transform: 'translate3d(0px, 0px, 0px)'}}>
-
-                    {  productPicture?productPicture.map((picture)=>{
-                          return (
-                    <div style={{display:'inline-block',border:'1px solid #000',borderRadius:5,paddingTop:30,paddingBottom:30,margin:2}}>
-                        <img src={`${ServerURL}/images/${picture.image}`} width='65px'/>
-                    </div>
-                          )
-                    }):<></>
-
-                    }
+                
+                <div style={{paddingTop: 30,paddingBottom:50,width:370}}>
+                
+                <Slider {...settings} ref={picSlider}>
+                    {showProductPicture()}
+                    </Slider>
                 </div>
+                
                 <div style={{paddingTop:0,paddingRight:50}}>
                 <div style={{listStyle:'none'}}>
                   <li style={{listStyle:'none',display: 'block',background: '#50526e',color: '#fff',padding: 20,textAlign: 'center',marginTop: 5,fontFamily: 'Helvetica', fontSize: 16,letterSpacing: 1,cursor: 'pointer'}}>
@@ -229,7 +325,7 @@ const displayProduct = (props) => {
                   <li style={{listStyle:'none',display: 'block',background: '#FFF',color: '#000',padding: 20,textAlign: 'center',marginTop:10,fontFamily: 'Helvetica', fontSize: 16,letterSpacing: 1,cursor: 'pointer',border:'1px solid'}}>
                       <span style={{display:"flex",alignItems:'center',justifyContent:'center'}}>
                       <img src='./whatsapp.png' width="20px"/>
-                      Lets Chat
+                      Let's Chat
                       </span>
                   </li>
                 </div>   
