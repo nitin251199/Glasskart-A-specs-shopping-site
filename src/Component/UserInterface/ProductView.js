@@ -3,7 +3,8 @@ import Header from "./Header";
 import { makeStyles } from "@material-ui/core/styles";
 import { Grid,Button,Divider } from '@material-ui/core'
 import { getData, postData, ServerURL } from "../FetchNodeServices";
-import ProductComponent from "./ProductComponent";
+import { useDispatch,useSelector } from "react-redux";
+import ShopCart from "./ShopCart";
 import Typography from '@material-ui/core/Typography';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Link from '@material-ui/core/Link';
@@ -40,10 +41,12 @@ export default function ProductView(props) {
         slidesToScroll: 1,
       };
 
+      var dispatch = useDispatch()
+      var cart = useSelector(state=>state.cart)
     var product = props.location.state.itemProps
     const [selected,setSelected] = useState(props.location.state.selected)
     var item = props.location.state.item
-   // const [active,setActive] = useState(false)
+   const [refresh,setRefresh] = useState(false)
    const [picSelected, setPicSelected] = useState("");
   const [productPicture, setProductPicture] = useState([]);
 
@@ -64,27 +67,38 @@ export default function ProductView(props) {
     const breadcrumbs = () => {
         return(
             <Breadcrumbs aria-label="breadcrumb">
-      <Link color="inherit" href="/home" 
+      <Link color="inherit"  
       style={{fontSize:12,letterSpacing:1}}
       >
-        HOME
+        <Typography variant="overline" color="textPrimary" style={{fontSize:12,letterSpacing:1}}>HOME</Typography>
       </Link>
       <Link color="inherit" 
-      href="/home"
+      
       style={{fontSize:12,letterSpacing:1}}
       >
-        GLASSKART
+        <Typography variant="overline" color="textPrimary" style={{fontSize:12,letterSpacing:1}}>GLASSKART</Typography>
       </Link>
-      <Typography color="textPrimary" style={{fontSize:12,letterSpacing:1}}>{product.productname}</Typography>
+      <Typography variant="overline" color="textPrimary" style={{fontSize:12,letterSpacing:1}}>{product.productname}</Typography>
     </Breadcrumbs>
         )
         
 }
 
 const handleChange = async(item) => {
-    var {finalproductid,colorid,colorname,offerprice,price,productpicture} = item
-    setSelected({finalproductid,colorid,colorname,offerprice,price,productpicture})
+    var {finalproductid,colorid,colorname,offerprice,price,productpicture,stock} = item
+    setSelected({finalproductid,colorid,colorname,offerprice,price,productpicture,stock})
+    setRefresh(!refresh)
   }
+
+const handleQtyChange = (value) => {
+    var data={...product,...selected,qty:value}
+    if(value==0)
+ {dispatch({type:"REMOVE_CART",payload:[selected.finalproductid]})}
+ else
+ {
+ dispatch({type:"ADD_CART",payload:[selected.finalproductid,data]})}
+ setRefresh(!refresh)
+}
 
   const clickThumbNails = (item,index) => {
     setPicSelected(item.pictureid);
@@ -148,9 +162,9 @@ const handleChange = async(item) => {
 const displayProduct = (props) => {
     return(
         <div style={{paddingInline:25}}>
-        <Grid container spacing={3}>
+        <Grid container spacing={5}>
             <Grid item xs={8}>
-            <p style={{textAlign:'center'}}>Product View</p>
+            <div style={{textAlign:'center',marginBottom:10}}>Product View</div>
             <div style={{
                    display:'flex',
                    justifyContent:'center',
@@ -310,7 +324,7 @@ const displayProduct = (props) => {
                     </div>
                 </div>
                 
-                <div style={{paddingTop: 30,paddingBottom:50,width:370}}>
+                <div style={{paddingTop: 30,paddingBottom:30,width:370}}>
                 
                 <Slider {...settings} ref={picSlider}>
                     {showProductPicture()}
@@ -318,10 +332,13 @@ const displayProduct = (props) => {
                 </div>
                 
                 <div style={{paddingTop:0,paddingRight:50}}>
+                    
                 <div style={{listStyle:'none'}}>
-                  <li style={{listStyle:'none',display: 'block',background: '#50526e',color: '#fff',padding: 20,textAlign: 'center',marginTop: 5,fontFamily: 'Helvetica', fontSize: 16,letterSpacing: 1,cursor: 'pointer'}}>
-                      Select Lenses
-                  </li>
+                <div style={{padding:10,fontWeight:700}}>
+                    {selected.stock==0?<span style={{color:'red'}}>Out of Stock</span>:selected.stock>=1 && selected.stock<=3?<span style={{color:'red'}}>Hurry! only {selected.stock} items left</span>:<span style={{color:'green'}}>In Stock</span>}    
+                </div>
+                    <ShopCart value={cart.hasOwnProperty(selected.finalproductid)?cart[selected.finalproductid].qty:0} onChange={(value)=>handleQtyChange(value)}/>
+                  
                   <li style={{listStyle:'none',display: 'block',background: '#FFF',color: '#000',padding: 20,textAlign: 'center',marginTop:10,fontFamily: 'Helvetica', fontSize: 16,letterSpacing: 1,cursor: 'pointer',border:'1px solid'}}>
                       <span style={{display:"flex",alignItems:'center',justifyContent:'center'}}>
                       <img src='./whatsapp.png' width="20px"/>
@@ -340,7 +357,7 @@ const displayProduct = (props) => {
 
     return(
             <div>
-      <Header history={props.history}/>
+      <Header history={props.history} setRefresh={setRefresh}/>
       <div style={{marginLeft:30,marginTop:30}}>
           {breadcrumbs()}
       </div>

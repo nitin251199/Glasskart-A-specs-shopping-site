@@ -1,4 +1,4 @@
-import React,{ useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { alpha, makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -7,15 +7,34 @@ import Badge from '@material-ui/core/Badge';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-import MailIcon from '@material-ui/icons/Mail';
-import NotificationsIcon from '@material-ui/icons/Notifications';
+import ShopCart from '@material-ui/icons/ShoppingCart';
+import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import MoreIcon from '@material-ui/icons/MoreVert';
-import  {getData} from "../FetchNodeServices"
+import { getData } from "../FetchNodeServices"
+import ButtonGroup from '@material-ui/core/ButtonGroup';
 import Button from '@material-ui/core/Button';
+import AddIcon from '@material-ui/icons/Add';
+import RemoveIcon from '@material-ui/icons/Remove';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import { Popper, Avatar } from '@material-ui/core';
+import clsx from 'clsx';
+import { ServerURL } from '../FetchNodeServices';
+import Drawer from '@material-ui/core/Drawer';
+import Divider from '@material-ui/core/Divider';
 
 
 const useStyles = makeStyles((theme) => ({
+  list: {
+    width: 350,
+  },
+  fullList: {
+    width: 'auto',
+  },
+  large: {
+    width: theme.spacing(8),
+    height: theme.spacing(8),
+  },
   grow: {
     flexGrow: 1,
   },
@@ -53,7 +72,7 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'center',
   },
   inputRoot: {
-    border:'solid 1px #dfe6e9'
+    border: 'solid 1px #dfe6e9'
   },
   inputInput: {
     padding: theme.spacing(1, 1, 1, 0),
@@ -87,6 +106,200 @@ export default function Header(props) {
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
+  /////////////////////////////////////////////////CART///////////////////////////////////////////////////
+  var cart = useSelector(state => state.cart)
+  var user = useSelector(state => state.user)
+  var dispatch = useDispatch()
+  var key = Object.keys(cart)
+  var ukey = Object.keys(user)
+  var products = Object.values(cart)
+  const [refresh, setRefresh] = useState(false)
+
+  var totalAmt = products.reduce(calculateAmount, 0)
+  var actualAmt = products.reduce(calculateActualAmount, 0)
+  var savingAmt = products.reduce(calculateSavingAmount, 0)
+
+  function calculateAmount(a, b) {
+    var actualPrice = b.offerprice > 0 ? b.offerprice * b.qty : b.price * b.qty
+    return (a + actualPrice)
+  }
+  function calculateActualAmount(a, b) {
+    return (a + (b.price * b.qty))
+  }
+  function calculateSavingAmount(a, b) {
+    var savingPrice = b.offerprice > 0 ? (b.price - b.offerprice) * b.qty : 0
+    return (a + savingPrice)
+  }
+
+  const displayCartItems = () => {
+    return products.map((item) => {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%' }} >
+          <div style={{ padding: 10, margin: 2, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
+            {/* <Avatar variant='square' src={`${ServerURL}/images/${item.productpicture}`} className={classes.large} /> */}
+            <img alt={item.productname} src={`${ServerURL}/images/${item.productpicture}`} width='100px' />
+            <div style={{ width: 20, height: 20, display: 'flex', justifyContent: 'center', marginTop: 10, }}>
+              <IconButton
+                aria-label="reduce"
+                onClick={() => {
+                  item.qty--
+                  setRefresh(!refresh)
+                  props.setRefresh(!refresh)
+                  if (item.qty == 0) {
+                    dispatch({ type: "REMOVE_CART", payload: [item.finalproductid] })
+                  }
+                }}
+                size="small"
+                //disabled={item.qty==1?true:false}
+                disableTouchRipple
+              >
+                <RemoveIcon style={{ width: 15, }} fontSize="small" />
+              </IconButton>
+              <label style={{ paddingInline: 10 }}>{item.qty}</label>
+              <IconButton
+                aria-label="increase"
+                onClick={() => {
+                  item.qty++
+                  setRefresh(!refresh)
+                  props.setRefresh(!refresh)
+                }}
+                size="small"
+                disableTouchRipple
+              >
+                <AddIcon style={{ width: 15 }} fontSize="small" />
+              </IconButton>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', padding: 10 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, margin: 2, letterSpacing: 1 }}>
+              {item.productname}
+            </div>
+            <div style={{ fontSize: 13, fontWeight: 500, margin: 2 }}>
+              <span> {item.colorname}</span>&nbsp;&nbsp;&nbsp;&nbsp;
+              <span>{item.offerprice > 0 ? <span>&#8377; {item.offerprice} × {item.qty}</span> : <span>&#8377; {item.price} × {item.qty}</span>}</span>
+            </div>
+            <div style={{ fontSize: 13, fontWeight: 500, margin: 2 }}>
+              {item.offerprice > 0 ? <span><s>&#8377; {item.price}</s></span> : <></>}
+            </div>
+            <div style={{ fontSize: 13, fontWeight: 500, margin: 2 }}>
+              {item.offerprice > 0 ? <span style={{ color: 'green' }}>You save &#8377; {(item.price - item.offerprice) * item.qty}</span> : <span>No offer</span>}
+            </div>
+
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: 10, fontSize: 13, fontWeight: 500, margin: 2 }} >
+            {item.offerprice > 0 ? <span>&#8377; {item.offerprice * item.qty}
+            </span> : <span>&#8377; {item.price * item.qty}</span>}
+
+
+
+          </div>
+
+
+
+        </div>
+
+
+      )
+
+
+
+    })
+
+
+  }
+
+
+  const [state, setState] = React.useState({
+    top: false,
+    left: false,
+    bottom: false,
+    right: false,
+  });
+
+  const toggleDrawer = (anchor, open) => {
+    setState({ ...state, [anchor]: open });
+  };
+
+  const list = (anchor) => (
+
+    <div
+      className={classes.list}
+      onKeyDown={() => toggleDrawer(anchor, false)}
+
+    >
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: 5 }}>
+        <img src="/glasskart.png" width="40%" />
+      </div>
+      {key.length == 0 ? <div>
+
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: 100 }}>
+          <img src="/emptycart.png" width="90%" />
+        </div>
+      </div> :
+        <>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 15 }}>
+            <span style={{ fontWeight: 600, padding: 10 }}><Badge color="secondary" overlap="circular" badgeContent={key.length}><img width="35px" src="/cart.png" /></Badge></span>
+            <span style={{ fontWeight: 600, float: 'right', padding: 10 }}>&#8377; {totalAmt}</span>
+
+          </div>
+          {displayCartItems()}
+          <Divider />
+          <div style={{ display: 'flex', flexDirection: 'column', fontSize: 15 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', }}>
+              <span style={{ fontWeight: 600, padding: 10 }}>Payable:</span>
+              <span style={{ fontWeight: 600, float: 'right', padding: 10 }}>&#8377; {actualAmt}</span>
+
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', }}>
+              <span style={{ fontWeight: 600, padding: 10 }}>Savings:</span>
+              <span style={{ fontWeight: 600, float: 'right', padding: 10, color: 'green' }}>&#8377; -{savingAmt}</span>
+
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', }}>
+              <span style={{ fontWeight: 600, padding: 10 }}>Delivery Charges:</span>
+              <span style={{ fontWeight: 600, float: 'right', padding: 10 }}>&#8377; {0}</span>
+
+            </div>
+
+            <Divider />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', }}>
+              <span style={{ fontWeight: 600, padding: 10 }}>Net Amount:</span>
+              <span style={{ fontWeight: 600, float: 'right', padding: 10 }}>&#8377; {totalAmt}</span>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', }}>
+              {ukey.length > 0 ? <li
+                onClick={() => props.history.push({ pathname: '/maincart' })}
+                style={{ listStyle: 'none', display: 'block', background: '#50526e', color: '#fff', padding: 20, textAlign: 'center', marginTop: 15, fontSize: 16, letterSpacing: 0.5, cursor: 'pointer', width: 280, fontWeight: 700 }}>
+                Make Payment
+              </li> : <li
+                onClick={() => props.history.push({ pathname: '/login' })}
+                style={{ listStyle: 'none', display: 'block', background: '#50526e', color: '#fff', padding: 20, textAlign: 'center', marginTop: 15, fontSize: 16, letterSpacing: 0.5, cursor: 'pointer', width: 280, fontWeight: 700 }}>
+                Proceed To Payment
+              </li>}
+            </div>
+          </div>
+        </>}
+
+    </div>
+  );
+
+  const showCart = () => {
+    return (
+      <div>
+        <React.Fragment key={'right'}>
+          <Drawer anchor={'right'} open={state['right']} onClose={() => toggleDrawer('right', false)}>
+            {list('right')}
+          </Drawer>
+        </React.Fragment>
+      </div>
+    )
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
   const handleProfileMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -115,8 +328,9 @@ export default function Header(props) {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+      {ukey.length == 0 ? <MenuItem onClick={()=>props.history.push({ pathname: '/login' })}>Sign In</MenuItem> :
+        <><MenuItem onClick={handleMenuClose}>My account</MenuItem>
+          <MenuItem onClick={handleMenuClose}>Log out</MenuItem></>}
     </Menu>
   );
 
@@ -131,22 +345,8 @@ export default function Header(props) {
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
     >
-      <MenuItem>
-        <IconButton aria-label="show 4 new mails" color="inherit">
-          <Badge badgeContent={4} color="secondary">
-            <MailIcon />
-          </Badge>
-        </IconButton>
-        <p>Messages</p>
-      </MenuItem>
-      <MenuItem>
-        <IconButton aria-label="show 11 new notifications" color="inherit">
-          <Badge badgeContent={11} color="secondary">
-            <NotificationsIcon />
-          </Badge>
-        </IconButton>
-        <p>Notifications</p>
-      </MenuItem>
+
+
       <MenuItem onClick={handleProfileMenuOpen}>
         <IconButton
           aria-label="account of current user"
@@ -158,13 +358,26 @@ export default function Header(props) {
         </IconButton>
         <p>Profile</p>
       </MenuItem>
+      <MenuItem onClick={handleProfileMenuOpen}>
+        <IconButton
+          aria-label="account of current user"
+          aria-controls="primary-search-account-menu"
+          aria-haspopup="true"
+          color="inherit"
+          onClick={()=>props.history.push({pathname:'/maincart'})}
+        >
+          <AccountCircle />
+        </IconButton>
+        <p>Cart</p>
+      </MenuItem>
     </Menu>
   );
 
   /////////////////////////////////////My Work////////////////////////////////////////////
-    const [listCategories,setListCategories] = useState([])
-    const [myAnchorEl, setMyAnchorEl] = React.useState(null);
-    const [menuName, setMenuName] = React.useState('')
+  const [listCategories, setListCategories] = useState([])
+  const [myAnchorEl, setMyAnchorEl] = React.useState(null);
+  const [menuName, setMenuName] = React.useState('')
+
 
   const handleMyMenuClick = (event) => {
     setMyAnchorEl(event.currentTarget);
@@ -175,64 +388,64 @@ export default function Header(props) {
     setMyAnchorEl(null);
   };
 
+  const open = Boolean(myAnchorEl);
+
   const subMenu = () => {
-    if(menuName === "Eyeglasses"){
-    return  <MenuItem disableGutters={true}>
-            <div 
-            style={{display: 'flex', flexDirection: 'row', width: '1200',background: "#F5F3F8",}}
-            onMouseLeave={()=>setMyAnchorEl(null)}
-            >
-              <div onClick={()=>props.history.push({pathname: '/productlist'},{gender:'Men',categoryid:2})}>
-              <img src='/Meneye.jpg' width='600' />
-              </div>
-          <div onClick={()=>props.history.push({pathname: '/productlist'},{gender:'Women',categoryid:2})}>
-          <img src='/Womeneye.jpg' width='600' />
+    if (menuName === "Eyeglasses") {
+      return <Popper open={open} anchorEl={myAnchorEl} placement="bottom">
+        <div
+          style={{ display: 'flex', flexDirection: 'row', width: '100%', background: "#F5F3F8", }}
+          onMouseLeave={() => setMyAnchorEl(null)}
+        >
+          <div onClick={() => props.history.push({ pathname: '/productlist' }, { gender: 'Men', categoryid: 2 })}>
+            <img src='/Meneye.jpg' width='100%' />
           </div>
-            </div>
-    </MenuItem>
+          <div onClick={() => props.history.push({ pathname: '/productlist' }, { gender: 'Women', categoryid: 2 })}>
+            <img src='/Womeneye.jpg' width='100%' />
+          </div>
+        </div>
+      </Popper>
     }
-    else if(menuName === "Sunglasses"){
-      return  <MenuItem disableGutters={true}>
-            <div 
-            style={{display: 'flex', flexDirection: 'row', width: '1200',background: "#F5F3F8",}}
-            onMouseLeave={()=>setMyAnchorEl(null)}
-            >
-              <div onClick={()=>props.history.push({pathname: '/productlist'},{gender:'Men',categoryid:1})}>
-              <img src='/Mensun.jpg' width='600' />
-              </div>
-          <div onClick={()=>props.history.push({pathname: '/productlist'},{gender:'Women',categoryid:1})}>
-          <img src='/Womensun.jpg' width='600' />
+    else if (menuName === "Sunglasses") {
+      return <Popper open={open} anchorEl={myAnchorEl} placement="bottom">
+        <div
+          style={{ display: 'flex', flexDirection: 'row', width: '100%', background: "#F5F3F8", }}
+          onMouseLeave={() => setMyAnchorEl(null)}
+        >
+          <div onClick={() => props.history.push({ pathname: '/productlist' }, { gender: 'Men', categoryid: 1 })}>
+            <img src='/Mensun.jpg' width='100%' />
           </div>
-            </div>
-    </MenuItem>
+          <div onClick={() => props.history.push({ pathname: '/productlist' }, { gender: 'Women', categoryid: 1 })}>
+            <img src='/Womensun.jpg' width='100%' />
+          </div>
+        </div>
+      </Popper>
     }
   }
 
-  const fetchAllCategories = async()=>{
+  const fetchAllCategories = async () => {
     var list = await getData('product/fetchallcategories')
     setListCategories(list.data)
   }
 
-  useEffect(function(){
-      fetchAllCategories()
-  },[])
+  useEffect(function () {
+    fetchAllCategories()
+  }, [])
 
-  const mainMenu=()=>{
-    return listCategories.map((item)=>{
-      return(<Button 
-              //onClick={(event)=>handleMyMenuClick(event)}
-              onMouseEnter={(event) => handleMyMenuClick(event)}
-              value={item.categoryname}
-              style={{textTransform: "capitalize",fontSize: "1.2rem",height:100,padding:20}}
-              endIcon={<ArrowDropDownIcon />}
-              aria-controls="simple-menu" 
-              aria-haspopup="true" 
-              
-              >
-      
-      {item.categoryname}
+  const mainMenu = () => {
+    return listCategories.map((item) => {
+      return (<Button
+        //onClick={(event)=>handleMyMenuClick(event)}
+        onMouseEnter={(event) => handleMyMenuClick(event)}
+        value={item.categoryname}
+        style={{ background: 'none', textTransform: "capitalize", fontSize: "1.2rem", marginTop: 40, marginBottom: 40, paddingInline: 20 }}
+        endIcon={<ArrowDropDownIcon />}
 
-    </Button>)
+      >
+
+        {item.categoryname}
+
+      </Button>)
     })
   }
 
@@ -241,46 +454,29 @@ export default function Header(props) {
 
   return (
     <div className={classes.grow}>
-      <AppBar position="static" color="transparent">
+      <AppBar position="static" color="transparent" elevation='0'>
         <Toolbar>
-         
-        <div style={{ padding: 5 }} >
+
+          <div style={{ padding: 5 }} >
             <img src="/glasskart.png" width="150" />
           </div>
 
-            {mainMenu()}
+          {mainMenu()}
 
-            <Menu
-        id="simple-menu"
-        anchorEl={myAnchorEl}
-        open={Boolean(myAnchorEl)}
-        onClose={handleMyMenuClose}
-        getContentAnchorEl={null}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'center',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'center',
-        }}
-      >
-        {myAnchorEl?subMenu():<></>}
-      </Menu>
 
-          
+          {myAnchorEl ? subMenu() : <></>}
+
+
+
           <div className={classes.grow} />
           <div className={classes.sectionDesktop}>
-            <IconButton aria-label="show 4 new mails" color="inherit">
-              <Badge badgeContent={4} color="secondary">
-                <MailIcon />
+            <IconButton onClick={() => toggleDrawer('right', true)}
+              color="inherit">
+              <Badge badgeContent={key.length} color="secondary">
+                <ShopCart />
               </Badge>
             </IconButton>
-            <IconButton aria-label="show 17 new notifications" color="inherit">
-              <Badge badgeContent={17} color="secondary">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
+
             <IconButton
               edge="end"
               aria-label="account of current user"
@@ -289,6 +485,7 @@ export default function Header(props) {
               onClick={handleProfileMenuOpen}
               color="inherit"
             >
+
               <AccountCircle />
             </IconButton>
           </div>
@@ -307,6 +504,7 @@ export default function Header(props) {
       </AppBar>
       {renderMobileMenu}
       {renderMenu}
+      {showCart()}
     </div>
   );
 }

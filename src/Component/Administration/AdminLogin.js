@@ -69,6 +69,8 @@ export default function AdminLogin(props) {
     var result = await postData("admin/checkadminlogin",body);
     if(result.result)
     {
+      // alert("TOKEN:",result.token)
+      localStorage.setItem("token",JSON.stringify(result.token))
         props.history.replace({pathname:"/dashboard"})
     }
     else

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Header from "./Header";
 import { makeStyles } from "@material-ui/core/styles";
-import { getData, ServerURL,postData } from "../FetchNodeServices";
+import { getData, ServerURL, postData } from "../FetchNodeServices";
 import Button from "@material-ui/core/Button";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -33,17 +33,17 @@ export default function ProductList(props) {
   const [price, setPriceList] = useState([]);
   const [refresh, setRefresh] = useState(false);
   const [products, setProducts] = useState([]);
-  
- 
+
+
   const [genderatt, setgenderatt] = useState({
     Male: { key: 1, attr: "Male", chkstatus: false },
     Female: { key: 2, attr: "Female", chkstatus: false },
   });
 
-  const [sizeattr,setSizeAttr]=useState({
-    Small:{key:1,attr:"Small",chkstatus:false},
-    Medium:{key:2,attr:"Medium",chkstatus:false},
-    Large:{key:3,attr:"Large",chkstatus:false},
+  const [sizeattr, setSizeAttr] = useState({
+    Small: { key: 1, attr: "Small", chkstatus: false },
+    Medium: { key: 2, attr: "Medium", chkstatus: false },
+    Large: { key: 3, attr: "Large", chkstatus: false },
 
   })
 
@@ -89,24 +89,42 @@ export default function ProductList(props) {
 
   const fetchAllPrice = async () => {
     var result = await getData("price/fetchallprice");
-    setPriceList(result.data);
+    var pricedata = {};
+    result.data.map((item) => {
+      pricedata[item.priceid] = { ...item, chkstatus: false };
+    });
+    setPriceList(pricedata);
   };
 
   const handleMyMenuClose = () => {
     setMyAnchorEl(null);
   };
 
-  const handleChange = (event, item) => {
+  const handleChange =async(event, item) => {
     var obj = list;
     obj[item.shapeid]["chkstatus"] = event.currentTarget.checked;
     setList(obj);
+    var body = {
+      gender: props.location.state.gender,
+      categoryid: props.location.state.categoryid,
+      shapeid: list,
+    }
+    var result = await postData("product/fetchallproductsbygender_filter", body);
+    setProducts(result.data);
     setRefresh(!refresh);
   };
 
-  const handleChangeFrame = (event, item) => {
+  const handleChangeFrame = async (event, item) => {
     var obj = frameList;
     obj[item.frameid]["chkstatus"] = event.currentTarget.checked;
     setFrameList(obj);
+    var body = {
+      gender: props.location.state.gender,
+      categoryid: props.location.state.categoryid,
+      frameid: frameList,
+    }
+    var result = await postData("product/fetchallproductsbygender_filter", body);
+    setProducts(result.data);
     setRefresh(!refresh);
   };
   const handleChangeColor = (event, item) => {
@@ -134,6 +152,13 @@ export default function ProductList(props) {
     var obj = sizeattr;
     obj[item.attr]["chkstatus"] = event.currentTarget.checked;
     setSizeAttr(obj);
+    setRefresh(!refresh);
+  };
+
+  const handleChangePrice = (event, item) => {
+    var obj = price;
+    obj[item.priceid]["chkstatus"] = event.currentTarget.checked;
+    setPriceList(obj);
     setRefresh(!refresh);
   };
 
@@ -293,18 +318,42 @@ export default function ProductList(props) {
         });
 
       case "7":
-        return price.map((item) => {
+        // return price.map((item) => {
+        //   return (
+        //     <MenuItem
+        //       style={{
+        //         display: "flex",
+        //         flexDirection: "row",
+        //         width: 150,
+        //       }}
+        //       value={item.priceid}
+        //     >
+        //       {item.minprice} to {item.maxprice}
+        //     </MenuItem>
+        //   );
+        // });
+        return Object.values(price).map((item) => {
           return (
-            <MenuItem
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                width: 150,
-              }}
-              value={item.priceid}
-            >
-              {item.minprice} to {item.maxprice}
-            </MenuItem>
+            <FormGroup>
+              <MenuItem
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  width: 150,
+                }}
+                value={item.priceid}
+              >
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={item.chkstatus}
+                      onChange={(event) => handleChangePrice(event, item)}
+                    />
+                  }
+                  label={`${item.minprice} to ${item.maxprice}`}
+                />
+              </MenuItem>
+            </FormGroup>
           );
         });
     }
@@ -315,7 +364,7 @@ export default function ProductList(props) {
         <Button
           onClick={(event) => handleMyMenuClick(event)}
           //onMouseEnter={(event) => handleMyMenuClick(event)}
-          style={{textTransform: "capitalize",fontSize: "1.0rem"}}
+          style={{ textTransform: "capitalize", fontSize: "1.0rem" }}
           value={item.key}
           endIcon={<ArrowDropDownIcon />}
           aria-controls="simple-menu"
@@ -328,17 +377,17 @@ export default function ProductList(props) {
   };
 
   const fetchAllProducts = async () => {
-    var body={gender:props.location.state.gender,categoryid:props.location.state.categoryid}
-    var result = await postData("product/fetchallproductsbygender",body);
+    var body = { gender: props.location.state.gender, categoryid: props.location.state.categoryid }
+    var result = await postData("product/fetchallproductsbygender", body);
     setProducts(result.data);
   };
 
- 
+
 
   const displayProducts = () => {
     return products.map((item) => {
       return (
-       <ProductComponent product={item} history={props.history}/>
+        <ProductComponent product={item} history={props.history} />
       );
     });
   };
@@ -349,7 +398,7 @@ export default function ProductList(props) {
     fetchAllColors();
     fetchAllMaterial();
     fetchAllPrice();
-    
+
   }, []);
 
   useEffect(() => {
@@ -359,7 +408,7 @@ export default function ProductList(props) {
 
   return (
     <div>
-      <Header history={props.history}/>
+      <Header history={props.history} />
       <div
         style={{
           marginTop: 30,
@@ -388,11 +437,11 @@ export default function ProductList(props) {
           {subMenu(keyAttr)}
         </Menu>
       </div>
-    
-      <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap",padding:30}}>
+
+      <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap", padding: 30 }}>
         {displayProducts()}
       </div>
-      
+
     </div>
   );
 }

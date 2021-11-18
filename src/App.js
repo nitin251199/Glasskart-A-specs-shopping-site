@@ -25,6 +25,10 @@ import DisplayStatus from "./Component/Administration/DisplayMainPage";
 import ProductList from "./Component/UserInterface/ProductList"
 import Home from "./Component/UserInterface/Home"
 import ProductView from "./Component/UserInterface/ProductView";
+import Login from "./Component/UserInterface/Login"
+import SignUp from "./Component/UserInterface/SignUp"
+import MainCart from "./Component/UserInterface/MainCart"
+import AddressCart from "./Component/UserInterface/AddressCart"
 
 
   
@@ -56,6 +60,10 @@ import ProductView from "./Component/UserInterface/ProductView";
 <Route component={DisplayStatus} path="/displaystatus" props={props.history}/>
 <Route component={Home} path="/home" props={props.history}/>
 <Route component={ProductView} path="/productview" props={props.history} />
+<Route component={Login} path="/login" props={props.history} />
+<Route component={SignUp} path="/signup" props={props.history} />
+<Route component={MainCart} path="/maincart" props={props.history} />
+<Route component={AddressCart} path="/addresscart" props={props.history} />
 
 
     </Router>

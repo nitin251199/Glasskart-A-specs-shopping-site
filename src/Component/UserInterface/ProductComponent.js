@@ -14,7 +14,7 @@ export default function ProductComponent(props){
     })
     var itemProps = props.product
     const [item,setItem] = useState({details:[]})
-    const [selected,setSelected] = useState({finalproductid:'',colorid:'',colorname:'',offerprice:'',price:'',productpicture:''})
+    const [selected,setSelected] = useState({finalproductid:'',colorid:'',colorname:'',offerprice:'',price:'',productpicture:'',stock:''})
     const [status,setStatus] = useState(false)
 
     const fetchFinalProductDetails=async()=>{
@@ -22,8 +22,8 @@ export default function ProductComponent(props){
         const result=await postData("finalproduct/fetchallfinalproductsbyproductid",body)
       setItem((prev)=>({...prev,details:result.data}))
       if(result.data.length > 0) {
-        var {finalproductid,colorid,colorname,offerprice,price,productpicture} = result.data[0]
-        setSelected({finalproductid,colorid,colorname,offerprice,price,productpicture})
+        var {finalproductid,colorid,colorname,offerprice,price,productpicture,stock} = result.data[0]
+        setSelected({finalproductid,colorid,colorname,offerprice,price,productpicture,stock})
     }
   }
 
@@ -38,8 +38,8 @@ export default function ProductComponent(props){
     }
 
     const handleChange = (item) => {
-      var {finalproductid,colorid,colorname,offerprice,price,productpicture} = item
-      setSelected({finalproductid,colorid,colorname,offerprice,price,productpicture})
+      var {finalproductid,colorid,colorname,offerprice,price,productpicture,stock} = item
+      setSelected({finalproductid,colorid,colorname,offerprice,price,productpicture,stock})
     }
 
     const handleClick=(itemProps,selected,item)=>{
