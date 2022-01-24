@@ -13,6 +13,8 @@ import Drawer from '@material-ui/core/Drawer';
 import Add from '@material-ui/icons/Add';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
+import { v4 as uuidv4 } from 'uuid';
+import Swal from 'sweetalert2';
 
 const useStyles = makeStyles((theme) => ({
     list: {
@@ -101,9 +103,65 @@ export default function AddressCart(props) {
         description: 'Gurugram,Haryana',
         image:`/glasskart.png`,
 
-        handler: function (response) {
+        handler:async function (response) {
 
-            alert(response.razorpay_payment_id);
+            var dat=new Date()
+            // alert(dat.getDate(),(dat.getMonth()+1),dat.getFullYear())
+            var date=dat.getDate()
+            var month=dat.getMonth()+1
+            var year=dat.getFullYear()
+            var Crt=cart.productid
+            alert(response.razorpay_payment_id)
+                var d=date+"/"+month+"/"+year
+          
+            
+            var body={
+                
+                "orderdate":d,
+            
+                name:name,
+                "email":user.emailid,
+                "mobileno":mobilenumber,
+                "address":address,
+                "city":city,
+                "state":userState,
+                "zipcode":pinCode,
+                cart:products,
+                "amount":totalAmt,
+                "paymentmode":"online",
+                "paymenttype":"razorpay",
+                "transactionid":response.razorpay_payment_id,
+                "deliveryStatus":'placed',
+                "status":"ongoing",
+                "invoiceno":uuidv4()
+                
+                        }
+    
+                      
+                       var result = await postData("order/addorders",body);
+                        if(result)
+                        {
+                          Swal.fire({
+                            title: 'GlassKart.com',
+                            text: 'Your Record has been placed successfully...',
+                            imageUrl: '/glasskart.png',
+                            imageWidth: 400,
+                            imageHeight: 200,
+                            imageAlt: 'Custom image',
+                          })
+                        }
+                        else
+                      {
+                        Swal.fire({
+                          title: 'GlassKart.com',
+                          text: 'Error in updating the record...',
+                          imageUrl: '/glasskart.png',
+                          imageWidth: 400,
+                          imageHeight: 200,
+                          imageAlt: 'Custom image',
+                        })
+                      }
+          
         },
         prefill: {
           name: user.firstname + " " + user.lastname,

@@ -29,6 +29,9 @@ import Login from "./Component/UserInterface/Login"
 import SignUp from "./Component/UserInterface/SignUp"
 import MainCart from "./Component/UserInterface/MainCart"
 import AddressCart from "./Component/UserInterface/AddressCart"
+import Invoice from "./Component/Administration/invoice"
+import OrderDetail from "./Component/Administration/orderdetail";
+
 
 
   
@@ -64,6 +67,8 @@ import AddressCart from "./Component/UserInterface/AddressCart"
 <Route component={SignUp} path="/signup" props={props.history} />
 <Route component={MainCart} path="/maincart" props={props.history} />
 <Route component={AddressCart} path="/addresscart" props={props.history} />
+<Route component={Invoice} path="/invoice" props={props.history} />
+<Route component={OrderDetail} path="/orderdetail" props={props.history} />
 
 
     </Router>
