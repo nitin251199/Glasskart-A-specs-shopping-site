@@ -31,7 +31,9 @@ import MainCart from "./Component/UserInterface/MainCart"
 import AddressCart from "./Component/UserInterface/AddressCart"
 import Invoice from "./Component/Administration/invoice"
 import OrderDetail from "./Component/Administration/orderdetail";
-
+import MyAccount from "./Component/UserInterface/MyAccount"
+import DisplayInvoice from "./Component/Administration/DisplayInvoice";
+import OrderHistory from "./Component/UserInterface/OrderHistory";
 
 
   
@@ -69,6 +71,9 @@ import OrderDetail from "./Component/Administration/orderdetail";
 <Route component={AddressCart} path="/addresscart" props={props.history} />
 <Route component={Invoice} path="/invoice" props={props.history} />
 <Route component={OrderDetail} path="/orderdetail" props={props.history} />
+<Route component={MyAccount} path="/myaccount" props={props.history} />
+<Route component={DisplayInvoice} path="/displayinvoice" props={props.history} />
+<Route component={OrderHistory} path="/orderhistory" props={props.history} />
 
 
     </Router>

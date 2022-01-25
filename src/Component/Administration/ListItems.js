@@ -22,6 +22,8 @@ import DisplayAllFinalProducts from './DisplayAllFinalProducts';
 import ProductPictures from './ProductPictures';
 import EditProductPictures from './EditProductPictures';
 import DisplayMainPage from './DisplayMainPage';
+import OrderDetail from './orderdetail';
+import DisplayInvoice from './DisplayInvoice';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -48,6 +50,20 @@ const handleClick=(v)=>{
         <DashboardIcon />
       </ListItemIcon>
       <ListItemText primary="Dashboard" />
+    </ListItem>
+
+    <ListItem button onClick={()=>handleClick(<OrderDetail  setComponent={props.setComponent}/>)}>
+      <ListItemIcon>
+        <DashboardIcon />
+      </ListItemIcon>
+      <ListItemText primary="Orders" />
+    </ListItem>
+
+    <ListItem button onClick={()=>handleClick(<DisplayInvoice  setComponent={props.setComponent}/>)}>
+      <ListItemIcon>
+        <DashboardIcon />
+      </ListItemIcon>
+      <ListItemText primary="Invoices" />
     </ListItem>
 
 

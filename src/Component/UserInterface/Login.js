@@ -50,6 +50,7 @@ export default function Login(props)
       var otpval=parseInt(8999*Math.random()+1000) 
       alert(otpval)
       setGotp(otpval)
+      localStorage.setItem('user', JSON.stringify(result.data[0]))
       dispatch({type:'ADD_USER',payload:[result.data[0].mobileno,result.data[0]]})
       result = await postData('sendsms/sendotp',{otp:otpval,mobileno:mobileno})
     

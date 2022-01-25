@@ -329,7 +329,7 @@ export default function Header(props) {
       onClose={handleMenuClose}
     >
       {ukey.length == 0 ? <MenuItem onClick={()=>props.history.push({ pathname: '/login' })}>Sign In</MenuItem> :
-        <><MenuItem onClick={handleMenuClose}>My account</MenuItem>
+        <><MenuItem onClick={()=>props.history.push("/myaccount")}>My account</MenuItem>
           <MenuItem onClick={handleMenuClose}>Log out</MenuItem></>}
     </Menu>
   );
@@ -392,7 +392,7 @@ export default function Header(props) {
 
   const subMenu = () => {
     if (menuName === "Eyeglasses") {
-      return <Popper open={open} anchorEl={myAnchorEl} placement="bottom">
+      return <Popper open={open} anchorEl={myAnchorEl} placement="bottom-start">
         <div
           style={{ display: 'flex', flexDirection: 'row', width: '100%', background: "#F5F3F8", }}
           onMouseLeave={() => setMyAnchorEl(null)}
@@ -407,7 +407,7 @@ export default function Header(props) {
       </Popper>
     }
     else if (menuName === "Sunglasses") {
-      return <Popper open={open} anchorEl={myAnchorEl} placement="bottom">
+      return <Popper open={open} anchorEl={myAnchorEl} placement="bottom-start">
         <div
           style={{ display: 'flex', flexDirection: 'row', width: '100%', background: "#F5F3F8", }}
           onMouseLeave={() => setMyAnchorEl(null)}
@@ -436,7 +436,7 @@ export default function Header(props) {
     return listCategories.map((item) => {
       return (<Button
         //onClick={(event)=>handleMyMenuClick(event)}
-        onMouseEnter={(event) => handleMyMenuClick(event)}
+        onMouseOver={(event) => handleMyMenuClick(event)}
         value={item.categoryname}
         style={{ background: 'none', textTransform: "capitalize", fontSize: "1.2rem", marginTop: 40, marginBottom: 40, paddingInline: 20 }}
         endIcon={<ArrowDropDownIcon />}

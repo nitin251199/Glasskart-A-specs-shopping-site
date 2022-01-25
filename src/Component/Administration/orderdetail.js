@@ -13,7 +13,7 @@ const useStyles = makeStyles((theme) => ({
       alignItems: 'center',
     },
     subdiv: {
-      width: 800,
+      width: 900,
       height: "auto",
       background: "#f1f2f6",
       marginTop: 5,
@@ -24,7 +24,6 @@ const useStyles = makeStyles((theme) => ({
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      height:600
     },
     dsubdiv: {
       width:800,
@@ -33,7 +32,6 @@ const useStyles = makeStyles((theme) => ({
       justifyContent: 'center',
       alignItems: 'center',
       background:'#ecf0f1',
-      padding:1,
       borderRadius:5,
     },
     large: {
@@ -48,7 +46,6 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: theme.palette.background.paper,
       border: '2px solid #000',
       boxShadow: theme.shadows[5],
-      padding: theme.spacing(2, 4, 3),
     },
   }));
 
@@ -65,7 +62,7 @@ const classes = useStyles()
   };
 
   const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(+event.target.value);
+    setRowsPerPage(event.target.value);
     setPage(0);
   };
 
@@ -74,7 +71,6 @@ const [open, setOpen] = React.useState(false);
 const [modalStyle] = React.useState(getModalStyle);
 
       const[order,setorder]=useState([])
-      const [selectedRow, setSelectedRow] = useState(null)
 
       const handleOpen = () => {
         setOpen(true);
@@ -147,8 +143,8 @@ const [modalStyle] = React.useState(getModalStyle);
                     minWidth: 150
                     }, render:()=><TextField variant="outlined" fullWidth/>},
                 { title: "Product ID",cellStyle: {
-                  width: 70,
-                  minWidth: 70
+                  width: 40,
+                  minWidth: 40
                   },headerStyle: {
                     width: 70,
                     minWidth: 70
@@ -167,7 +163,7 @@ const [modalStyle] = React.useState(getModalStyle);
                 { title: " Delivery Status", render: (rowData) => <div>{rowData.deliverystatus}</div> },
                 { title: " Status", render: (rowData) => <div>{rowData.status}</div> },
                 { title: " Action", render: (rowData) => <div>{rowData.status !== "Confirmed" ? 
-                            <IconButton onClick={()=>HandleBillwindow(rowData)}><ReceiptIcon /></IconButton> : "Confirmed"}</div> },
+                <IconButton onClick={()=>HandleBillwindow(rowData)}><ReceiptIcon /></IconButton> : "Confirmed"}</div> },
                 // { title: " Invoice NO.", render: (rowData) => <div>{rowData.invoiceno}</div> },  
                
                 
@@ -215,11 +211,11 @@ const [modalStyle] = React.useState(getModalStyle);
 
     const body = (
       <div style={modalStyle} className={classes.paper}>
-        <div className={classes.droot}>
-          <div className={classes.dsubdiv}>
+        {/* <div className={classes.droot}>
+          <div className={classes.dsubdiv}> */}
          {SimpleAction2()}
-         </div>
-      </div>
+         {/* </div>
+      </div> */}
      
       </div>
     );
@@ -244,11 +240,11 @@ const [modalStyle] = React.useState(getModalStyle);
           
             data={order}  
             actions={[
-              {
-                icon: 'save',
-                tooltip: 'Save User',
-                onClick: (event, rowData) => alert("You saved " + rowData.name)
-              },
+              // {
+              //   icon: 'save',
+              //   tooltip: 'Save User',
+              //   onClick: (event, rowData) => alert("You saved " + rowData.name)
+              // },
               {
                 icon: ()=> <VisibilityIcon/>,
                 tooltip: 'View Details',
